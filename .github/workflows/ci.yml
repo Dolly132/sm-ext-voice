@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - main
+      - fix-win32
     tags:
       - "*"
   pull_request:
@@ -68,7 +69,7 @@ jobs:
   #         ls -all
 
   build-release-extension:
-    uses: srcdslab/ci-workflows/.github/workflows/shared_build_release_am_extension.yml@v1
+    uses: Dolly132/ci-workflows/.github/workflows/shared_build_release_am_extension.yml@main
     # needs: install-protobuf
     with:
       sdks: "css"
