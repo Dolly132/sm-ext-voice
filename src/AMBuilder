@@ -25,8 +25,8 @@ for sdk_name in Extension.sdks:
 
     # Silence fatal errors on unrecognized Clang warning flags from CDetour
     if cxx.family in ['gcc', 'clang']:
-        binary.compiler.cflags += ['-Wno-unknown-warning-option']
-        binary.compiler.cxxflags += ['-Wno-unknown-warning-option']
+      binary.compiler.cflags += ['-Wno-unknown-warning-option']
+      binary.compiler.cxxflags += ['-Wno-unknown-warning-option']
 
     if sdk['name'] in ['csgo']:
       binary.compiler.cxxincludes += [
@@ -42,16 +42,26 @@ for sdk_name in Extension.sdks:
         os.path.join(Extension.protobuf_valve_root, 'csgo', 'netmessages.pb.cc'),
       ]
 
+    # Include headers from the src directory where celt headers reside
     binary.compiler.cxxincludes += [
-      os.path.join(Extension.ext_root, 'src', 'celt')
+      os.path.join(Extension.ext_root, 'src', 'celt', 'src'),
+      os.path.join(Extension.ext_root, 'src', 'celt', 'include')
     ]
-    # TODO: add proper linux support for x64
+
+    # Linux x86 static library linking
     if cxx.target.arch in ['x86'] and cxx.target.platform in ['linux']:
       binary.compiler.linkflags += [
         os.path.join(Extension.ext_root, 'src', 'celt', 'libcelt0.a')
       ]
-    # TODO: add proper windows support for celt
+
+    # Windows 32-bit dynamic linking to celt32.dll
     if cxx.target.platform in ['windows']:
-      binary.compiler.linkflags += ['/FORCE:UNRESOLVED']
+      celt_dir = os.path.join(Extension.ext_root, 'src', 'celt')
+      
+      # Pass the binary directory to search path and specify library link
+      binary.compiler.postlink += [
+        '-L' + celt_dir,
+        '-lcelt32'
+      ]
 
 Extension.extensions += builder.Add(project)
