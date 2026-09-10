@@ -41,12 +41,14 @@
 extern "C" {
 #endif
 
-#if defined(__GNUC__) && defined(CELT_BUILD)
-#define EXPORT __attribute__ ((visibility ("default")))
-#elif defined(WIN32)
-#define EXPORT __declspec(dllexport)
+#if defined(CELT_BUILD) && defined(DLL_EXPORT)
+  #define EXPORT __declspec(dllexport)
+#elif defined(CELT_SHARED_LIB)
+  #define EXPORT __declspec(dllimport)
+#elif defined(__GNUC__) && defined(CELT_BUILD)
+  #define EXPORT __attribute__ ((visibility ("default")))
 #else
-#define EXPORT
+  #define EXPORT
 #endif
 
 #define _celt_check_int(x) (((void)((x) == (celt_int32)0)), (celt_int32)(x))
