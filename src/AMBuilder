@@ -57,10 +57,11 @@ for sdk_name in Extension.sdks:
     if cxx.target.platform in ['windows']:
       celt_dir = os.path.join(Extension.ext_root, 'src', 'celt')
       
-      # Pass the binary directory to search path and specify library link
+      # Correct MSVC linker flags
       binary.compiler.postlink += [
-        '-L' + celt_dir,
-        '-lcelt32'
+        '/LIBPATH:' + celt_dir,
+        'celt32.dll',
+        'ws2_32.lib'
       ]
 
 Extension.extensions += builder.Add(project)
