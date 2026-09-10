@@ -57,9 +57,15 @@ for sdk_name in Extension.sdks:
     if cxx.target.platform in ['windows']:
       celt_dir = os.path.join(Extension.ext_root, 'src', 'celt')
       
+      # Select library based on compiler target architecture
+      if cxx.target.arch == 'x64':
+        celt_lib = 'celt64.lib'
+      else:
+        celt_lib = 'celt32.lib'
+
       binary.compiler.postlink += [
         '/LIBPATH:' + celt_dir,
-        'celt32.lib',
+        celt_lib,
         'ws2_32.lib'
       ]
 
