@@ -47,6 +47,12 @@ for sdk_name in Extension.sdks:
       os.path.join(Extension.ext_root, 'src', 'celt'),
     ]
 
+    # Ensure compiler macro parity with celt32.lib / celt64.lib
+    binary.compiler.defines += [
+      'HAVE_CONFIG_H',
+      '_CRT_SECURE_NO_WARNINGS',
+    ]
+
     celt_dir = os.path.join(Extension.ext_root, 'src', 'celt')
     is_64bit = cxx.target.arch in ['x86_64', 'x64', 'amd64']
 
@@ -60,10 +66,8 @@ for sdk_name in Extension.sdks:
     # Windows static library linking (32-bit & 64-bit support)
     if cxx.target.platform in ['windows']:
       celt_lib = 'celt64.lib' if is_64bit else 'celt32.lib'
-
-      binary.compiler.postlink += [
-        '/LIBPATH:' + celt_dir,
-        celt_lib,
+      binary.compiler.linkflags += [
+        os.path.join(celt_dir, celt_lib),
         'ws2_32.lib'
       ]
 
