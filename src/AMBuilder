@@ -50,6 +50,7 @@ for sdk_name in Extension.sdks:
     # Ensure compiler macro parity with celt32.lib / celt64.lib
     binary.compiler.defines += [
       'HAVE_CONFIG_H',
+      'CUSTOM_MODES',
       '_CRT_SECURE_NO_WARNINGS',
     ]
 
