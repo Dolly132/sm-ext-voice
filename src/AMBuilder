@@ -55,12 +55,11 @@ for sdk_name in Extension.sdks:
 
     # Windows 32-bit dynamic linking to celt32.dll
     if cxx.target.platform in ['windows']:
-      celt_dir = os.path.join(Extension.ext_root, 'src', 'celt')
+      celt_dir = os.path.join(Extension.ext_root, 'path_to_celt_folder')
       
-      # Correct MSVC linker flags
       binary.compiler.postlink += [
         '/LIBPATH:' + celt_dir,
-        'celt32.dll',
+        'celt32.lib',
         'ws2_32.lib'
       ]
 
