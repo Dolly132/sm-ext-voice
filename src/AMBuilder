@@ -44,8 +44,7 @@ for sdk_name in Extension.sdks:
 
     # Include headers from the src directory where celt headers reside
     binary.compiler.cxxincludes += [
-      os.path.join(Extension.ext_root, 'src', 'celt', 'src'),
-      os.path.join(Extension.ext_root, 'src', 'celt', 'include')
+      os.path.join(Extension.ext_root, 'src', 'celt'),
     ]
 
     # Linux x86 static library linking
