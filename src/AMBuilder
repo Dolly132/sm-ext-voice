@@ -47,21 +47,19 @@ for sdk_name in Extension.sdks:
       os.path.join(Extension.ext_root, 'src', 'celt'),
     ]
 
-    # Linux x86 static library linking
-    if cxx.target.arch in ['x86'] and cxx.target.platform in ['linux']:
+    celt_dir = os.path.join(Extension.ext_root, 'src', 'celt')
+    is_64bit = cxx.target.arch in ['x86_64', 'x64', 'amd64']
+
+    # Linux static library linking (32-bit & 64-bit support)
+    if cxx.target.platform in ['linux']:
+      celt_lib = 'libcelt64.a' if is_64bit else 'libcelt32.a'
       binary.compiler.linkflags += [
-        os.path.join(Extension.ext_root, 'src', 'celt', 'libcelt0.a')
+        os.path.join(celt_dir, celt_lib)
       ]
 
-    # Windows 32-bit dynamic linking to celt32.dll
+    # Windows static library linking (32-bit & 64-bit support)
     if cxx.target.platform in ['windows']:
-      celt_dir = os.path.join(Extension.ext_root, 'src', 'celt')
-      
-      # Select library based on compiler target architecture
-      if cxx.target.arch == 'x64':
-        celt_lib = 'celt64.lib'
-      else:
-        celt_lib = 'celt32.lib'
+      celt_lib = 'celt64.lib' if is_64bit else 'celt32.lib'
 
       binary.compiler.postlink += [
         '/LIBPATH:' + celt_dir,
