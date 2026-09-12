@@ -722,16 +722,6 @@ void CVoice::HandleNetwork()
 	if(PollRes <= 0)
 		return;
 
-	if(PollRes > 1)
-	{
-#ifdef _WIN32
-		if (PollRes == SOCKET_ERROR)
-		    smutils->LogError(myself, "WSAPoll failed, WSAGetLastError=%d", WSAGetLastError());
-#endif
-		smutils->LogMessage(myself, "PollRes=%d, m_PollFds=%d", PollRes, m_PollFds);
-		for (int i = 0; i < m_PollFds; i++)
-		    smutils->LogMessage(myself, "  fd[%d]=%lld events=%d revents=%d", i, (long long)m_aPollFds[i].fd, m_aPollFds[i].events, m_aPollFds[i].revents);
-	}
 	// Accept new clients
 	if(m_aPollFds[0].revents & POLLIN)
 	{
@@ -1127,18 +1117,8 @@ void CVoice::BroadcastVoiceData(IClient *pClient, size_t nBytes, unsigned char *
 			DETOUR_STATIC_CALL(SV_BroadcastVoiceData_CSGO)(pClient, msg, drop);
 	#endif
 #else
-	#ifdef _WIN32
-		#ifndef WIN64
-		__asm mov ecx, pClient;
-		__asm mov edx, nBytes;
-		#endif
-
-		if (g_SvCallOriginalBroadcast->GetInt())
-			DETOUR_STATIC_CALL(SV_BroadcastVoiceData_LTCG)((char *)pData, 0);
-	#else
 		if (g_SvCallOriginalBroadcast->GetInt())
 			DETOUR_STATIC_CALL(SV_BroadcastVoiceData)(pClient, nBytes, (char *)pData, 0);
-	#endif
 #endif
 	smutils->LogMessage(myself, "Well, it got sent successfully...");
 }
