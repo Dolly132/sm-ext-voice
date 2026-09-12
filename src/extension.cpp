@@ -945,6 +945,7 @@ void CVoice::HandleVoiceData()
 	if(!FramesAvailable)
 		return;
 
+	smutils->LogMessage(myself, "Frames are available so can they be sent?");
 	// Before starting playback we want at least 100ms in the buffer
 	if(m_AvailableTime < getTime() && TimeAvailable < 0.1)
 		return;
@@ -953,6 +954,7 @@ void CVoice::HandleVoiceData()
 	if(m_AvailableTime > getTime() + 0.5)
 		return;
 
+	smutils->LogMessage(myself, "We are on the finding soruce tv phase..");
 	// 5 = max frames per packet
   size_t max_frames = 5;
 	FramesAvailable = min_ext(FramesAvailable, max_frames);
@@ -978,6 +980,7 @@ void CVoice::HandleVoiceData()
 		return;
 	}
 
+	smutils->LogMessage(myself, "Found source tv...");
 	for(size_t Frame = 0; Frame < FramesAvailable; Frame++)
 	{
 		// Get data into buffer from ringbuffer.
@@ -1020,6 +1023,7 @@ void CVoice::HandleVoiceData()
 			if(pClient->m_Socket == -1 || pClient->m_New == true)
 				continue;
 
+			smutils->LogMessage("Receiving the buffer of voice...");
 			m_Buffer.SetWriteIndex(pClient->m_BufferWriteIndex);
 
 			if(m_Buffer.CurrentLength() > pClient->m_LastLength)
