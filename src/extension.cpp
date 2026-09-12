@@ -1044,6 +1044,7 @@ void CVoice::HandleVoiceData()
 
 void CVoice::BroadcastVoiceData(IClient *pClient, size_t nBytes, unsigned char *pData)
 {
+	smutils->LogMessage(myself, "Supposed to send voice packets for source tv");
 	if (!g_Interface.OnBroadcastVoiceData(pClient, nBytes, (char*)pData))
 		return;
 
@@ -1112,4 +1113,5 @@ void CVoice::BroadcastVoiceData(IClient *pClient, size_t nBytes, unsigned char *
 			DETOUR_STATIC_CALL(SV_BroadcastVoiceData)(pClient, nBytes, (char *)pData, 0);
 	#endif
 #endif
+	smutils->LogMessage(myself, "Well, it got sent successfully...");
 }
