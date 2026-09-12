@@ -803,7 +803,10 @@ void CVoice::HandleNetwork()
 				break;
 		}
 		if(Client == -1)
+		{
+			smutils->LogMessage(myself, "No client found btw...");
 			continue;
+		}
 
 		CClient *pClient = &m_aClients[Client];
 
@@ -824,12 +827,17 @@ void CVoice::HandleNetwork()
 
 		// Data available?
 		if(!(m_aPollFds[PollFds].revents & POLLIN))
+		{
+			smutils->LogMessage(myself, "No data available....");
 			continue;
+		}
 
 		size_t BytesAvailable;
 		if(my_ioctl(pClient->m_Socket, FIONREAD, &BytesAvailable) == -1)
+		{
+			smutils->LogMessage(myself, "my_ioctl failed...");
 			continue;
-
+		}
 		if(pClient->m_New)
 		{
 			pClient->m_BufferWriteIndex = m_Buffer.GetReadIndex();
@@ -841,7 +849,10 @@ void CVoice::HandleNetwork()
 		// Don't recv() when we can't fit data into the ringbuffer
 		char aBuf[32768];
 		if(min_ext(BytesAvailable, sizeof(aBuf)) > m_Buffer.CurrentFree() * sizeof(int16_t))
+		{
+			smutils->LogMessage(myself, "min_ext failed....");
 			continue;
+		}
 
 		// Edge case: previously received data is uneven and last recv'd byte has to be prepended
 		int Shift = 0;
@@ -853,7 +864,7 @@ void CVoice::HandleNetwork()
 		}
 
 		ssize_t Bytes = recv(pClient->m_Socket, &aBuf[Shift], sizeof(aBuf) - Shift, 0);
-
+		smutils->LogMessage(myself, "Receiving %d bytes from client...", Bytes);
 		if(Bytes <= 0)
 		{
 			if (pClient->m_Socket != -1)
