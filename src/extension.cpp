@@ -492,7 +492,7 @@ bool convert_ip(const char *ip, struct in_addr *addr)
 #endif
 }
 
-void close_socket(int sock)
+void close_socket(socket_t sock)
 {
 #ifdef _WIN32
     closesocket(sock);
@@ -515,9 +515,12 @@ int my_poll(struct pollfd *fds, int nfds, int timeout)
 int my_ioctl(socket_t sockfd, long cmd, size_t *argp)
 {
 #ifdef _WIN32
-    return ioctlsocket(sockfd, cmd, reinterpret_cast<u_long*>(argp)); // Windows version
+    u_long avail = 0;
+    int ret = ioctlsocket(sockfd, cmd, &avail);
+    *argp = avail;
+    return ret;
 #else
-    return ioctl(sockfd, cmd, argp);        // Linux/macOS version
+    return ioctl(sockfd, cmd, argp);
 #endif
 }
 
@@ -738,7 +741,7 @@ void CVoice::HandleNetwork()
 			struct sockaddr_storage addr;
 			socklen_t size = sizeof(addr);
 
-			int Socket = accept(m_ListenSocket, (sockaddr *)&addr, &size);
+			socket_t Socket = accept(m_ListenSocket, (sockaddr *)&addr, &size);
 
 			if (Socket != -1)
 			{
