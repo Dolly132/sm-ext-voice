@@ -804,10 +804,7 @@ void CVoice::HandleNetwork()
 				break;
 		}
 		if(Client == -1)
-		{
-			smutils->LogMessage(myself, "No client found btw...");
 			continue;
-		}
 
 		CClient *pClient = &m_aClients[Client];
 
@@ -828,17 +825,12 @@ void CVoice::HandleNetwork()
 
 		// Data available?
 		if(!(m_aPollFds[PollFds].revents & POLLIN))
-		{
-			smutils->LogMessage(myself, "No data available....");
 			continue;
-		}
 
 		size_t BytesAvailable;
 		if(my_ioctl(pClient->m_Socket, FIONREAD, &BytesAvailable) == -1)
-		{
-			smutils->LogMessage(myself, "my_ioctl failed...");
 			continue;
-		}
+
 		if(pClient->m_New)
 		{
 			pClient->m_BufferWriteIndex = m_Buffer.GetReadIndex();
@@ -850,10 +842,7 @@ void CVoice::HandleNetwork()
 		// Don't recv() when we can't fit data into the ringbuffer
 		char aBuf[32768];
 		if(min_ext(BytesAvailable, sizeof(aBuf)) > m_Buffer.CurrentFree() * sizeof(int16_t))
-		{
-			smutils->LogMessage(myself, "min_ext failed....");
 			continue;
-		}
 
 		// Edge case: previously received data is uneven and last recv'd byte has to be prepended
 		int Shift = 0;
@@ -865,7 +854,6 @@ void CVoice::HandleNetwork()
 		}
 
 		ssize_t Bytes = recv(pClient->m_Socket, &aBuf[Shift], sizeof(aBuf) - Shift, 0);
-		smutils->LogMessage(myself, "Receiving %d bytes from client...", Bytes);
 		if(Bytes <= 0)
 		{
 			if (pClient->m_Socket != -1)
@@ -915,7 +903,6 @@ void CVoice::HandleNetwork()
 
 void CVoice::OnDataReceived(CClient *pClient, int16_t *pData, size_t Samples)
 {
-	smutils->LogMessage(myself, "Got voice data from network...");
 	// Check for empty input
 	ssize_t DataStartsAt = -1;
 	for(size_t i = 0; i < Samples; i++)
@@ -958,7 +945,6 @@ void CVoice::HandleVoiceData()
 	if(!FramesAvailable)
 		return;
 
-	smutils->LogMessage(myself, "Frames are available so can they be sent?");
 	// Before starting playback we want at least 100ms in the buffer
 	if(m_AvailableTime < getTime() && TimeAvailable < 0.1)
 		return;
@@ -967,7 +953,6 @@ void CVoice::HandleVoiceData()
 	if(m_AvailableTime > getTime() + 0.5)
 		return;
 
-	smutils->LogMessage(myself, "We are on the finding soruce tv phase..");
 	// 5 = max frames per packet
   size_t max_frames = 5;
 	FramesAvailable = min_ext(FramesAvailable, max_frames);
@@ -993,7 +978,6 @@ void CVoice::HandleVoiceData()
 		return;
 	}
 
-	smutils->LogMessage(myself, "Found source tv...");
 	for(size_t Frame = 0; Frame < FramesAvailable; Frame++)
 	{
 		// Get data into buffer from ringbuffer.
@@ -1036,7 +1020,6 @@ void CVoice::HandleVoiceData()
 			if(pClient->m_Socket == -1 || pClient->m_New == true)
 				continue;
 
-			smutils->LogMessage(myself, "Receiving the buffer of voice...");
 			m_Buffer.SetWriteIndex(pClient->m_BufferWriteIndex);
 
 			if(m_Buffer.CurrentLength() > pClient->m_LastLength)
@@ -1061,7 +1044,6 @@ void CVoice::HandleVoiceData()
 
 void CVoice::BroadcastVoiceData(IClient *pClient, size_t nBytes, unsigned char *pData)
 {
-	smutils->LogMessage(myself, "Supposed to send voice packets for source tv");
 	if (!g_Interface.OnBroadcastVoiceData(pClient, nBytes, (char*)pData))
 		return;
 
@@ -1120,5 +1102,4 @@ void CVoice::BroadcastVoiceData(IClient *pClient, size_t nBytes, unsigned char *
 		if (g_SvCallOriginalBroadcast->GetInt())
 			DETOUR_STATIC_CALL(SV_BroadcastVoiceData)(pClient, nBytes, (char *)pData, 0);
 #endif
-	smutils->LogMessage(myself, "Well, it got sent successfully...");
 }
