@@ -504,46 +504,9 @@ void close_socket(socket_t sock)
 int my_poll(struct pollfd *fds, int nfds, int timeout)
 {
 #ifdef _WIN32
-    fd_set readfds, exceptfds;
-    FD_ZERO(&readfds);
-    FD_ZERO(&exceptfds);
-    SOCKET maxfd = 0;
-
-    for (int i = 0; i < nfds; i++)
-    {
-        fds[i].revents = 0;
-        if (fds[i].fd == INVALID_SOCKET)
-            continue;
-        if (fds[i].events & POLLIN)
-            FD_SET(fds[i].fd, &readfds);
-        FD_SET(fds[i].fd, &exceptfds);
-        if (fds[i].fd > maxfd)
-            maxfd = fds[i].fd;
-    }
-
-    timeval tv;
-    tv.tv_sec = timeout / 1000;
-    tv.tv_usec = (timeout % 1000) * 1000;
-
-    int ret = select(0, &readfds, NULL, &exceptfds, timeout >= 0 ? &tv : NULL);
-    if (ret <= 0)
-        return ret;
-
-    int count = 0;
-    for (int i = 0; i < nfds; i++)
-    {
-        if (fds[i].fd == INVALID_SOCKET)
-            continue;
-        if (FD_ISSET(fds[i].fd, &readfds))
-            fds[i].revents |= POLLIN;
-        if (FD_ISSET(fds[i].fd, &exceptfds))
-            fds[i].revents |= POLLHUP;
-        if (fds[i].revents)
-            count++;
-    }
-    return count;
+	return WSAPoll(fds, nfds, timeout);
 #else
-    return poll(fds, nfds, timeout);
+	return poll(fds, nfds, timeout);
 #endif
 }
 
@@ -756,6 +719,14 @@ void CVoice::HandleNetwork()
 		return;
 
 	int PollRes = my_poll(m_aPollFds, m_PollFds, 0);
+#ifdef _WIN32
+	if (PollRes == SOCKET_ERROR)
+	    smutils->LogError(myself, "WSAPoll failed, WSAGetLastError=%d", WSAGetLastError());
+#endif
+	smutils->LogMessage(myself, "PollRes=%d, m_PollFds=%d", PollRes, m_PollFds);
+	for (int i = 0; i < m_PollFds; i++)
+	    smutils->LogMessage(myself, "  fd[%d]=%lld events=%d revents=%d", i, (long long)m_aPollFds[i].fd, m_aPollFds[i].events, m_aPollFds[i].revents);
+
 	if(PollRes <= 0)
 		return;
 
