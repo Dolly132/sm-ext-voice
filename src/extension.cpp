@@ -903,6 +903,7 @@ void CVoice::HandleNetwork()
 
 void CVoice::OnDataReceived(CClient *pClient, int16_t *pData, size_t Samples)
 {
+	smutils->LogMessage(myself, "Got voice data from network...");
 	// Check for empty input
 	ssize_t DataStartsAt = -1;
 	for(size_t i = 0; i < Samples; i++)
