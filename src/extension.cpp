@@ -719,17 +719,19 @@ void CVoice::HandleNetwork()
 		return;
 
 	int PollRes = my_poll(m_aPollFds, m_PollFds, 0);
-#ifdef _WIN32
-	if (PollRes == SOCKET_ERROR)
-	    smutils->LogError(myself, "WSAPoll failed, WSAGetLastError=%d", WSAGetLastError());
-#endif
-	smutils->LogMessage(myself, "PollRes=%d, m_PollFds=%d", PollRes, m_PollFds);
-	for (int i = 0; i < m_PollFds; i++)
-	    smutils->LogMessage(myself, "  fd[%d]=%lld events=%d revents=%d", i, (long long)m_aPollFds[i].fd, m_aPollFds[i].events, m_aPollFds[i].revents);
-
 	if(PollRes <= 0)
 		return;
 
+	if(PollRes > 1)
+	{
+#ifdef _WIN32
+		if (PollRes == SOCKET_ERROR)
+		    smutils->LogError(myself, "WSAPoll failed, WSAGetLastError=%d", WSAGetLastError());
+#endif
+		smutils->LogMessage(myself, "PollRes=%d, m_PollFds=%d", PollRes, m_PollFds);
+		for (int i = 0; i < m_PollFds; i++)
+		    smutils->LogMessage(myself, "  fd[%d]=%lld events=%d revents=%d", i, (long long)m_aPollFds[i].fd, m_aPollFds[i].events, m_aPollFds[i].revents);
+	}
 	// Accept new clients
 	if(m_aPollFds[0].revents & POLLIN)
 	{
@@ -791,7 +793,7 @@ void CVoice::HandleNetwork()
 					m_aClients[Client].m_UnEven = false;
 
 					m_aPollFds[m_PollFds].fd = Socket;
-					m_aPollFds[m_PollFds].events = POLLIN | POLLHUP;
+					m_aPollFds[m_PollFds].events = POLLIN;
 					m_aPollFds[m_PollFds].revents = 0;
 					m_PollFds++;
 
