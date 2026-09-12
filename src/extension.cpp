@@ -1023,7 +1023,7 @@ void CVoice::HandleVoiceData()
 			if(pClient->m_Socket == -1 || pClient->m_New == true)
 				continue;
 
-			smutils->LogMessage("Receiving the buffer of voice...");
+			smutils->LogMessage(myself, "Receiving the buffer of voice...");
 			m_Buffer.SetWriteIndex(pClient->m_BufferWriteIndex);
 
 			if(m_Buffer.CurrentLength() > pClient->m_LastLength)
