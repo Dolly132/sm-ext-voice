@@ -42,6 +42,7 @@
   #include <winsock2.h>
   #include <ws2tcpip.h>
   typedef SOCKET socket_t;
+  #define INVALID_SOCKET_T INVALID_SOCKET
 #else
   #include <sys/types.h>
   #include <sys/socket.h>
@@ -50,6 +51,7 @@
   #include <sys/ioctl.h>
   #include <poll.h>
   typedef int socket_t;
+  #define INVALID_SOCKET_T -1
 #endif
 
 #include <iclient.h>
@@ -741,7 +743,7 @@ void CVoice::HandleNetwork()
 
 			socket_t Socket = accept(m_ListenSocket, (sockaddr *)&addr, &size);
 
-			if (Socket != -1)
+			if (Socket != INVALID_SOCKET_T)
 			{
 				char ipStr[INET6_ADDRSTRLEN] = {0};
 
