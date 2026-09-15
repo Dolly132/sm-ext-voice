@@ -274,14 +274,14 @@ void OnGameFrame(bool simulating)
 
 CVoice::CVoice()
 {
-	m_ListenSocket = -1;
+	m_ListenSocket = INVALID_SOCKET_T;
 
 	m_PollFds = 0;
 	for(int i = 1; i < 1 + MAX_CLIENTS; i++)
 		m_aPollFds[i].fd = -1;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aClients[i].m_Socket = -1;
+		m_aClients[i].m_Socket = INVALID_SOCKET_T;
 
 	m_AvailableTime = 0.0;
 
@@ -465,7 +465,7 @@ void CVoice::SDK_OnAllLoaded()
 
 	// Init tcp server
 	m_ListenSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if(m_ListenSocket < 0)
+	if(m_ListenSocket == INVALID_SOCKET_T)
 	{
 		smutils->LogError(myself, "Failed creating socket.");
 		SDK_OnUnload();
@@ -647,18 +647,18 @@ void CVoice::SDK_OnUnload()
 		m_VoiceDetour = NULL;
 	}
 
-	if(m_ListenSocket != -1)
+	if(m_ListenSocket != INVALID_SOCKET_T)
 	{
 		close_socket(m_ListenSocket);
-		m_ListenSocket = -1;
+		m_ListenSocket = INVALID_SOCKET_T;
 	}
 
 	for (int Client = 0; Client < MAX_CLIENTS; Client++)
 	{
-		if(m_aClients[Client].m_Socket != -1)
+		if(m_aClients[Client].m_Socket != INVALID_SOCKET_T)
 		{
 			close_socket(m_aClients[Client].m_Socket);
-			m_aClients[Client].m_Socket = -1;
+			m_aClients[Client].m_Socket = INVALID_SOCKET_T;
 		}
 	}
 
@@ -717,7 +717,7 @@ bool CVoice::OnBroadcastVoiceData(IClient *pClient, size_t nBytes, char *data)
 
 void CVoice::HandleNetwork()
 {
-	if(m_ListenSocket == -1)
+	if(m_ListenSocket == INVALID_SOCKET_T)
 		return;
 
 	int PollRes = my_poll(m_aPollFds, m_PollFds, 0);
@@ -731,7 +731,7 @@ void CVoice::HandleNetwork()
 		int Client;
 		for(Client = 0; Client < MAX_CLIENTS; Client++)
 		{
-			if(m_aClients[Client].m_Socket == -1)
+			if(m_aClients[Client].m_Socket == INVALID_SOCKET_T)
 				break;
 		}
 
@@ -814,10 +814,10 @@ void CVoice::HandleNetwork()
 		// Make sure to set SO_LINGER l_onoff = 1, l_linger = 0
 		if(m_aPollFds[PollFds].revents & POLLHUP)
 		{
-			if (pClient->m_Socket != -1)
+			if (pClient->m_Socket != INVALID_SOCKET_T)
 				close_socket(pClient->m_Socket);
 
-			pClient->m_Socket = -1;
+			pClient->m_Socket = INVALID_SOCKET_T;
 			m_aPollFds[PollFds].fd = -1;
 			CompressPollFds = true;
 			if (g_SvLogging->GetInt())
@@ -858,10 +858,10 @@ void CVoice::HandleNetwork()
 		ssize_t Bytes = recv(pClient->m_Socket, &aBuf[Shift], sizeof(aBuf) - Shift, 0);
 		if(Bytes <= 0)
 		{
-			if (pClient->m_Socket != -1)
+			if (pClient->m_Socket != INVALID_SOCKET_T)
 				close_socket(pClient->m_Socket);
 
-			pClient->m_Socket = -1;
+			pClient->m_Socket = INVALID_SOCKET_T;
 			m_aPollFds[PollFds].fd = -1;
 			CompressPollFds = true;
 			if (g_SvLogging->GetInt())
@@ -1019,7 +1019,7 @@ void CVoice::HandleVoiceData()
 		for(int Client = 0; Client < MAX_CLIENTS; Client++)
 		{
 			CClient *pClient = &m_aClients[Client];
-			if(pClient->m_Socket == -1 || pClient->m_New == true)
+			if(pClient->m_Socket == INVALID_SOCKET_T || pClient->m_New == true)
 				continue;
 
 			m_Buffer.SetWriteIndex(pClient->m_BufferWriteIndex);
