@@ -73,3 +73,4 @@ jobs:
     # needs: install-protobuf
     with:
       sdks: "css"
+      os-list: '["ubuntu-22.04"]'
